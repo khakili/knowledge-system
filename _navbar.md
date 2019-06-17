@@ -10,7 +10,7 @@
 
 * 算法与设计模式
 	* [设计模式](/design/)
-	* [算法](/pattern/)
+	* [算法](/algorithm/)
 
 * 并发
 	* [高并发原理](/concurrentPrinciple/)
