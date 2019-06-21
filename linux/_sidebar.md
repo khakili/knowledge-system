@@ -6,5 +6,4 @@
 	* [pidstat](/linux/pidstat.md)
 	* [vmstat](/linux/vmstat.md)
 	* [iostat](/linux/iostat.md)
-	* [df -h](/linux/df.md)
-	* [du -sh](/linux/du.md)
+	* [du -sh与df -h](/linux/du.md)
