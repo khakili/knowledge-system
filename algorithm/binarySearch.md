@@ -7,7 +7,7 @@
 
 ## 算法描述
 
-!> 二分查找需要一个有序的集合，一下为**递增集合**
+!> 二分查找需要一个有序的集合，以下为**递增集合**
 
 ```java
  Integer binarySearch(int[] array, int item) {
