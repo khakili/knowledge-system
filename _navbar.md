@@ -1,8 +1,9 @@
 * [linux](/linux/)
 * JAVA基础
-	* [Spring原理](/spring/)
+	* [Java基础](/java/)
 	* [JAVA集合类](/collection/) 
 	* [JVM和GC](/gc/)
+	* [Spring原理](/spring/)
 
 * 网络
 	* [网络通信和协议](/network/)

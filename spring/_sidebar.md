@@ -1,0 +1,1 @@
+* spring中@Component与@Configuration
