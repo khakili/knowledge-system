@@ -8,5 +8,5 @@
 		* [整数集合](redis/structure/intset.md)
 		* [压缩列表](redis/structure/ziplist.md)
 		
-	* redis对象
+	* [redis对象](redis/redisobject.md)
 		* [string](redis/object/string.md)
