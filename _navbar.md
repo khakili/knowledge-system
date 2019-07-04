@@ -1,5 +1,5 @@
 * JAVA
-	* [Java基础](/java/elementary/)
+	* [JAVA基础](/java/elementary/)
 	* [JAVA集合类](/java/collection/) 
 	* [JAVA多线程](/java/thread/)
 	* [JVM和GC](/java/gc/)
