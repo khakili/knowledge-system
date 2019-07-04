@@ -1,6 +1,6 @@
 * Netty
-	* [BIO、NIO和AIO](netty/io.md)
-	* [Netty的核心组件](netty/component.md)
+	* [BIO、NIO和AIO](network/netty/io.md)
+	* [Netty的核心组件](network/netty/component.md)
 	* [Netty的线程模型]()
 	* [TCP 粘包/拆包的原因及解决方法]()
 	* [序列化协议及使用场景]()
