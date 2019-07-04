@@ -1,4 +1,4 @@
-* JAVA基础
+* JAVA
 	* [Java基础](/java/)
 	* [JAVA集合类](/collection/) 
 	* [JAVA多线程](/gc/)
