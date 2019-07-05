@@ -8,7 +8,7 @@ Java SDK并发包通过Lock和Condition两个接口来实现管程，其中的Lo
 
 本节重点介绍Lock的使用，在这之前，我们先思考一个问题：Java语言本身提供的synchronized也是管程的一种实现，既然Java从语言层面已经实现了管程，为什么SDK还要提供另一种实现呢？
 
-** 再造管程的理由
+## 再造管程的理由
 
 我们在解决死锁问题的时候，提出了一个**破坏不可抢占条件**方案，但是这个方案synchroized没有办法解决。原因是synchroized在申请资源时，如果申请不到，线程直接阻塞，而我们希望的是：
 > 对于"不可抢占"这个条件，占用部分资源的线程进一步申请其他资源时，如果申请不到，可以主动释放它战友的资源，这样不可抢占条件就破坏掉了。
@@ -26,7 +26,7 @@ Java SDK并发包通过Lock和Condition两个接口来实现管程，其中的Lo
     boolean tryLock();
 ```
 
-** 如何保证可见性
+## 如何保证可见性
 
 Java多线程里的可见性是通过Happens-Before规则保证的，其中有一条synchroized相关的规则：synchroized的解锁Happens-Before于后续对这个锁的加锁。那Lock靠什么保证可见性呢？
 
@@ -34,7 +34,7 @@ Lock**利用了volatile相关的Happens-Before规则**。
 
 Java SDK里面的ReentrantLock，内部持有一个volatile的成员变量state，获取锁的时候，会重写state的值；解锁的时候，也会读写state的值。
 
-** 什么是可重入锁
+## 什么是可重入锁
 
 ReentrantLock，翻译过来叫**可重入锁**。所谓可重入锁，顾名思义，指的是**线程可以重复获取同一把锁**。
 
