@@ -99,7 +99,17 @@ private void doReceived(Response res) {
 }
 
 ```
+
 调用线程通过调用get()方法等待RPC返回结果，这个方法里面，我们看到的都是熟悉的"面孔"：调用lock()获取锁，在finally里面调用unlock()释放锁；获取锁后，通过经典的在循环中调用 await() 方法来实现等待。
+
+当RPC结果返回时，会调用doReceived()方法，这个方法里面，调用lock()获取锁，在finally里面调用unlock()释放锁，获取锁后通过调用signal()来通知调用线程，结果已经返回，不用继续等待了。
+
+## 总结
+
+Lock&Condition是管程的一种实现，所以能否用好Lock和Condition要看你对管程模型理解的怎么样。
+
+Lock&Condition实现的管程相对于synchronized实现的管程来说更加灵活、功能也更丰富。
+
 
 
 
