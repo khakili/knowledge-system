@@ -81,6 +81,58 @@ static void addOne() {
 
 ## 快速实现一个限流器
 
+上面的例子，我们用信号量实现了一个最简单的互斥锁功能。估计你会觉得奇怪，既然有Java SDK里面提供了Lock，为啥还要提供一个Semaphore？其实实现一个互斥锁只是Semaphore的部分功能，Semaphore还有一个功能是Lock不容易实现的，那就是**Semaphore可以允许多个线程访问一个临界区**。
+
+现实中还有这种需求？有的，比较常见的需求就是我们工作中遇到的各种池化资源，例如连接池、对象池、线程池等等。其中，你可能最熟悉数据库连接池，在同一时刻，一定是允许多个线程同事使用连接池的，当然，每个链接在释放之前，是不允许其他线程使用的。
+
+限流器中的限流，指的是不允许多于N个线程同事进入临界区。那如何快速实现一个这样的限流器呢？这种场景，我们就立刻想到了信号量的解决方案。
+
+信号量的计数器，在上面的例子中，我们设置成了1，这个1表示只允许一个线程进入临界区，但如果我们把计数器的值设置成对象池里对象的个数N，就能完美解决对象池的限流问题了。
+
+```java
+class ObjPool<T, R> {
+  final List<T> pool;
+  // 用信号量实现限流器
+  final Semaphore sem;
+  // 构造函数
+  ObjPool(int size, T t){
+    pool = new Vector<T>(){};
+    for(int i=0; i<size; i++){
+      pool.add(t);
+    }
+    sem = new Semaphore(size);
+  }
+  // 利用对象池的对象，调用 func
+  R exec(Function<T,R> func) {
+    T t = null;
+    sem.acquire();
+    try {
+      t = pool.remove(0);
+      return func.apply(t);
+    } finally {
+      pool.add(t);
+      sem.release();
+    }
+  }
+}
+// 创建对象池
+ObjPool<Long, String> pool = 
+  new ObjPool<Long, String>(10, 2);
+// 通过对象池获取 t，之后执行  
+pool.exec(t -> {
+    System.out.println(t);
+    return t.toString();
+});
+
+```
+我们用一个List来保存对象实例，用Semaphore实现限流器。关键的低吗是ObjPool里面的exec()方法，这个方法里面实现了限流的功能。这个方法里面，我们首先调用acquire()方法（与之匹配的是在finally里面调用release()方法），假设对象池的大小是10，信号量的计数器初始化为10，那么前10个线程调用acquire()方法，都能继续执行，相当于通过了信号灯，而其他线程则会阻塞在acquire()方法上。对于信号灯的线程，我们为每个线程分配了一个对象t（这个分配工作是通过pool.remoce(0)实现的），分配完之后会执行一个回调函数func，而函数的参数正是前面分配的对象t；执行完回调函数之后，他们就会释放对象（这个释放工作是通过pool.add(t)实现的），同时调用release()方法来更新信号量的计数器。如果此时信号量里计数器的值小于等于0，那么说明线程在等待，此时会自动唤醒等待的线程。
+
+思考一下，上面对象池的例子中，对象保存在了Vector中，Vector是Java线程的线程安全的容器，如果我们把Vector换成ArrayList，是否可以呢？
+
+## 总结
+
+信号量在Java语言里面的名气并不算大，Java在并发变成领域走的很快，重点支持的还是管程模型。管程模型理论上解决了信号量模型的一些不足，主要体现在易用性和工程化方面。
+
 
 
 
