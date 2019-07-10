@@ -28,7 +28,7 @@ class Semaphore{
   Semaphore(int c){
     this.count=c;
   }
-  // 
+  
   void down(){
     this.count--;
     if(this.count<0){
@@ -36,6 +36,7 @@ class Semaphore{
       // 阻塞当前线程
     }
   }
+  
   void up(){
     this.count++;
     if(this.count<=0) {
