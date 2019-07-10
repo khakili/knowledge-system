@@ -62,5 +62,131 @@ class Cache<K,V> {
 
 ![](images/readwritelock/lazyput.png)
 
+## 实现缓存的按需加载
 
+文中下面的这段代码实现了按需加载的功能，这里我们假设缓存的源头是数据库。需要注意的是，如果缓存中没有缓存目标对象，那么就需要从数据库中加载，然后写入缓存，写缓存需要用到写锁，所以在代码中的⑤处，我们调用了w.lock()来获取写锁。
 
+另外，还需要注意的是，在获取写锁之后，我们并没有直接去查询数据库，而是在代码⑥⑦处，重新验证了一次缓存中是否存在，再次验证如果还是不存在，我们才去查询数据库并更新本地缓存，为什么我们要再次验证呢？
+
+```java
+
+class Cache<K,V> {
+  final Map<K, V> m =
+    new HashMap<>();
+  final ReadWriteLock rwl = 
+    new ReentrantReadWriteLock();
+  final Lock r = rwl.readLock();
+  final Lock w = rwl.writeLock();
+ 
+  V get(K key) {
+    V v = null;
+    // 读缓存
+    r.lock();         ①
+    try {
+      v = m.get(key); ②
+    } finally{
+      r.unlock();     ③
+    }
+    // 缓存中存在，返回
+    if(v != null) {   ④
+      return v;
+    }  
+    // 缓存中不存在，查询数据库
+    w.lock();         ⑤
+    try {
+      // 再次验证
+      // 其他线程可能已经查询过数据库
+      v = m.get(key); ⑥
+      if(v == null){  ⑦
+        // 查询数据库
+        v= 省略代码无数
+        m.put(key, v);
+      }
+    } finally{
+      w.unlock();
+    }
+    return v; 
+  }
+}
+
+```
+
+原因是在高并发的场景下，有可能会有多线程竞争写锁。假设缓存是空的，没有缓存任何东西，如果此时有三个线程T1、T2和T3同时调用get()方法，并且参数与key也是相同的。那么它们会同事执行到代码⑤处，但此时只有一个线程能获得写锁，假设是线程T1，线程T1获取写锁之后查询数据库并更新缓存，最终释放写锁。此时线程T2和T3会再有一个线程能够获取写锁，假设是T2，如果不采用再次验证的方式，此时T2会再次查询数据库。T2释放写锁之后，T3也会再次查询一次数据库。而实际上线程T1已经把缓存的值设置好了，T2、T3完全没必要再次查询数据库。所以，再次验证的方式，能够避免高并发场景下重复查询数据的问题。
+
+## 读写锁的升级与降级
+
+什么是**锁的升级**？读锁是可以被多线程共享的，写锁是单线程独占的，也就是说写锁的并发限制比读锁高，从读锁变成写锁，称为**锁升级**，同理，从写锁变成读锁，称为**锁降级**。
+
+我们来看下下面这段代码：
+
+```java
+// 读缓存
+r.lock();         ①
+try {
+  v = m.get(key); ②
+  if (v == null) {
+    w.lock();
+    try {
+      // 再次验证并更新缓存
+      // 省略详细代码
+    } finally{
+      w.unlock();
+    }
+  }
+} finally{
+  r.unlock();     ③
+}
+
+```
+
+这段代码看上去好像没什么问题，先是获取读锁，然后再升级为写锁。可惜**ReadWriteLock并不支持这种升级**。这段代码中，读锁还没释放，此时获取写锁，会导致写锁永久等待，最终导致相关线程都被阻塞，永远也没有机会被唤醒，**锁的升级是不允许的**。
+
+不过，虽然锁的升级是不允许的，但是锁的降级确实允许的。以下代码来源自ReentrantReadWriteLock的官方示例，略作了改动。你会发现在代码①处，获取读锁的时候线程还是持有写锁的，这种锁的降级是支持的。
+
+```java
+
+class CachedData {
+  Object data;
+  volatile boolean cacheValid;
+  final ReadWriteLock rwl =
+    new ReentrantReadWriteLock();
+  // 读锁  
+  final Lock r = rwl.readLock();
+  // 写锁
+  final Lock w = rwl.writeLock();
+  
+  void processCachedData() {
+    // 获取读锁
+    r.lock();
+    if (!cacheValid) {
+      // 释放读锁，因为不允许读锁的升级
+      r.unlock();
+      // 获取写锁
+      w.lock();
+      try {
+        // 再次检查状态  
+        if (!cacheValid) {
+          data = ...
+          cacheValid = true;
+        }
+        // 释放写锁前，降级为读锁
+        // 降级是可以的
+        r.lock(); ①
+      } finally {
+        // 释放写锁
+        w.unlock(); 
+      }
+    }
+    // 此处仍然持有读锁
+    try {use(data);} 
+    finally {r.unlock();}
+  }
+}
+
+```
+
+## 总结
+
+读写锁类似于ReentrantLock，也支持公平模式和非公平模式。读锁和写锁都实现了java.util.concurrent.locks.Lock接口，所以除了支持lock()方法外，tryLock()、lockInterruptibly()等方法也都是支持的。但是有一点需要注意，那就是只有写锁支持条件变量，读锁是不支持条件变量的，读锁调用newCondition()会抛出UnsupportedOperationException异常。
+
+我们用ReadWriteLock实现了一个简单的缓存，这个缓存虽然解决了缓存的初始化问题，但是没有解决缓存数据与源头数据的同步问题，这里的数据同步指的是保证缓存数据和源头数据的一致性。解决数据同步问题的一个最简单的方案就是**超时机制**。所谓超时机制指的是加载进缓存的数据不是长久有效的，而是有时效的，当缓存的数据超过时效，这条数据在缓存中就失效了。而访问缓存中失效的数据，会出发缓存重新从源头把数据加载进缓存。
