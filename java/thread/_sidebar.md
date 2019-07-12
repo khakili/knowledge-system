@@ -7,4 +7,5 @@
     * [ReadWriteLock:如何快速实现一个完备的缓存](java/thread/readWriteLock.md)
     * [CountDownLatch和CyclicBarrier：如何让多线程步调一致](java/thread/countDownLatchAndCyclicBarrier.md)
     * [并发容器：都有哪些“坑”需要我们填？](java/thread/collection.md)
+    * [原子类：无锁工具类的典范](java/thread/atomicClass.md)
 * **案例分析**
