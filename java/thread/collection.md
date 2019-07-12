@@ -121,8 +121,9 @@ Java 并发包里面Queue这类并发容器是组复杂的，你可以从一下�
 
 ![](images/collection/doubleBlockingQueue.png)
 
-3、单端非阻塞队列：其实现有ConcurrentLinkedQueue。
-4、双端非阻塞队列：其实现有ConcurrentLinkedDeque。
+3、**单端非阻塞队列**：其实现有ConcurrentLinkedQueue。
+
+4、**双端非阻塞队列**：其实现有ConcurrentLinkedDeque。
 
 
 
