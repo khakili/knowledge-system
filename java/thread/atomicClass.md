@@ -36,7 +36,7 @@ public class Test {
 
 无锁方案相对互斥锁方案，最大的好处就是性能。互斥锁方案为了保证互斥性，需要执行加锁、解锁操作，而加锁、解锁操作本身就消耗性能；同事拿不到锁的线程还会进入阻塞状态，进而触发线程切换，线程切换对性能的消耗也很大。相比之下，无锁方案则完全没有加锁、解锁的性能消耗，同时还能保证互斥性，既解决了问题，又没有带来新的问题，可谓绝佳方案。那它是如何做到的呢？
 
-## 无所方案的实现原理
+## 无锁方案的实现原理
 
 其实原子类性能高的咪咪很简单，硬件支持而已。CPU为了解决并发问题，提供了CAS指令（CAS，全称是Compare And Swap，即"比较并交换"）。CAS指令包含3个参数：共享变量的内存地址A、用于比较的值B和共享变量的新值C；并且只有当内存中的地址A处的值等于B时，才能将内存中的地址A处的值更新为新值C。**作为一条CPU指令，CAS指令本身就是能够保证原子性的**。
 
@@ -156,3 +156,106 @@ do {
 }while(!compareAndSet(oldV,newV);
 
 ```
+
+## 原子类概览
+
+Java SDK并发包里面提供的原子类内容很丰富，我们将它们分为五个类别：**原子化的基本数据类型**、**原子化的对象引用类型**、**原子化数组**、**原子化对象属性更新器**和**原子化的累加器**。这五个类别提供的方法基本上时候相似的，并且每个类别都有若干原子类，你可以通过下面的原子类组成概览图来获得一个全局的印象。下面我们详细解决这五个类别。
+
+![](images/atomicClass/atomicClass.png)
+
+### 1.原子化的基本数据类型 
+
+相关实现有AtomicBoolean、AtomicInteger和AtomicLong，提供的方法主要有以下这些，详情你可以参考SDK的源代码，都很简单，这里就不详细介绍了。
+
+```java
+
+// 原子化 i++
+getAndIncrement() 
+// 原子化的 i--
+getAndDecrement() 
+// 原子化的 ++i
+incrementAndGet() 
+// 原子化的 --i
+decrementAndGet() 
+// 当前值 +=delta，返回 += 前的值
+getAndAdd(delta) 
+// 当前值 +=delta，返回 += 后的值
+addAndGet(delta)
+// CAS 操作，返回是否成功
+compareAndSet(expect, update)
+// 以下四个方法
+// 新值可以通过传入 func 函数来计算
+getAndUpdate(func)
+updateAndGet(func)
+getAndAccumulate(x,func)
+accumulateAndGet(x,func)
+
+```
+
+### 2.原子化的对象引用类型
+
+相关实现有AtomicReference、AtomicStamped和AtomicMarkableReference，利用他们可以实现对象引用的原子化更新。AtomicReference提供的方法和原子化的基本数据类型差不多。不过需要注意的是，对象引用的更新需要重点关注ABA的问题，AtomicStampedReference和AtomicMarkableReference这两个原子类可以解决ABA问题。
+
+解决ABA问题的思路其实很简单，增加一个版本号维度就可以了，跟乐观锁的机制很类似，每次执行CAS操作，附加再更新一个版本号，只要保证版本号是递增的，那么即便A变成B之后再变回A，版本号也不会变回来（版本号递增的）。AtomicStampedReference实现的CAS方法就增加了版本号参数，方法签名如下：
+
+```java
+
+boolean compareAndSet(
+  V expectedReference,
+  V newReference,
+  int expectedStamp,
+  int newStamp) 
+
+```
+
+AtomicMarkableReference的实现机制则很简单，将版本号简化成一个Boolean值，方法签名如下：
+
+```java
+
+boolean compareAndSet(
+  V expectedReference,
+  V newReference,
+  boolean expectedMark,
+  boolean newMark)
+
+```
+
+### 3.原子化数组
+
+相关实现有AtomicIntegerArray、AtomicLongArray和AtomicReferenceArray，利用这些原子类，我们可以原子化地更新数组里面的每一个元素。这些类提供的方法和原子化的基本数据类型的区别仅仅是：每个方法多了一个数组的索引参数。
+
+### 4.原子化对象属性更新器
+
+相关实现有AtomicIntegerFieldUpdater、AtomicLongFieldUpdater和AtomicReferenceFieldUpdater，利用它们可以原子化地更新对象的属性，这三个方法都是利用反射机制实现的，创建更新器的方法如下：
+
+```java
+
+public static <U>
+AtomicXXXFieldUpdater<U> 
+newUpdater(Class<U> tclass, 
+  String fieldName)
+
+```
+
+需要注意的是，**对象属性必须是volatile类型的，只有这样才能保证可见性**；如果对象属性不是volatile类型的，newUpdater()方法会抛出IllegalArgumentException这个运行时异常。
+
+你会发现newUpdater()的方法参数只有类的信息，没有对象的引用，而更新**对象**的属性，一定需要对象的引用，而这个参数是在哪里传入的呢？是在原子操作的方法参数中传入的。例如compareAndSet()这个原子操作，相比原子化的基本数据类型多了一个对象引用obj。原子化对象属性更新器相关的方法，相比原子化的基本数据类型仅仅是多了对象引用参数，所以这里不再赘述了。
+
+```java
+
+boolean compareAndSet(
+  T obj, 
+  int expect, 
+  int update)
+
+```
+
+### 5.原子化的累加器
+
+DoubleAccumulator、DoubleAdder、LongAccumulator和LongAdder，这四个类仅仅用来执行累加操作，相比原子化的基本数据雷子那个，速度更快，但是不支持compareAndSet()方法。如果你仅仅需要累加操作，使用原子化的累加器性能会更好。
+
+## 总结
+
+无锁方案相对于互斥锁方案，优点非常多，首先性能好，其次是基本不会出现死锁问题（但可能出现饥饿和活锁问题，因为自旋会反复重试）。Java提供的原子类大部分都实现了compareAndSet()方法。
+
+Java提供的原子类能够解决一些简单的原子性问题，但你可能会发现，上面我们所有原子类的方法都针对一个共享变量，如果你需要解决多个变量的原子性问题，建议还是使用互斥锁的方案。原子类虽好，但使用要慎之又慎哦。
