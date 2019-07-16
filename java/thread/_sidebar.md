@@ -9,5 +9,5 @@
     * [并发容器：都有哪些“坑”需要我们填？](java/thread/collection.md)
     * [原子类：无锁工具类的典范](java/thread/atomicClass.md)
     * [Executor与线程池：如何创建正确的线程池？](java/thread/executor.md)
-    
+    * [Future：如何用多线程实现最优的“烧水泡茶”程序？](java/thread/future.md)
 * **案例分析**
