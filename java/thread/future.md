@@ -19,7 +19,7 @@ Future<?>
 // 提交 Runnable 任务及结果引用  
 <T> Future<T> 
   submit(Runnable task, T result);
-
+ 
 ```
 
 你会发现它们的返回值都是Future接口，Future接口有5个方法，我都列在下面了，它们分别是取消任务的方法cancel()、判断任务是否已取消的方法inCancelled()、判断任务是否已结束的方法isDone()以及2个获得任务执行结果的get()和get(timeout,unit)，其中最后一个get(timeout,unit)支持超时机制。通过Future接口的这5个方法你会发现，我们提交的任务不单能够获取任务执行结果，还可以取消任务。不过需要注意的是：这两个get()方法都是阻塞式的，如果被调用的时候，任务还没有执行完，那么调用get()方法的线程会阻塞，知道任务执行完才会被唤醒。
