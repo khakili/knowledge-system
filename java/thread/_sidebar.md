@@ -2,6 +2,7 @@
 	* [万恶之源：可见性、有序性及原子性问题](java/thread/origin.md)
 	* [互斥锁（上）：解决原子性问题](java/thread/mutex1.md)
 	* [互斥锁（下）：如何用一把锁保护多个资源？](java/thread/mutex2.md)
+	* [一不小心就死锁了，怎么办？](java/thread/deadlock.md)
 * **工具类**
     * [Lock&Condition（上）:并发包中的管程](java/thread/lock.md)
     * [Lock&Condition（下）:如何异步转同步](java/thread/condition.md)
