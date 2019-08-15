@@ -46,6 +46,8 @@ typedef struct redisObject {
 
 |编码常量|类型|对象|
 |:-:|:-:|:-:|
-|REDIS_ENCODING_INT|REDIS_STRING|整数值实现字符串对象|
-|REDIS_ENCODING_EMBSTR|REDIS_STRING|embstr编码的简单SDS|
-|REDIS_ENCODING_RAW|REDIS_STRING|普通SDS|
+|REDIS_ENCODING _INT|REDIS_STRING|整数值实现字符串对象|
+|REDIS_ ENCODING _EMBSTR|REDIS_STRING|embstr编码的简单SDS|
+|REDIS_ ENCODING _RAW|REDIS_STRING|普通SDS|
+
+- encoding 属性是为了提升Redis的灵活性和效率，Redis可以根据
