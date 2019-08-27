@@ -3,4 +3,5 @@
     * [工厂模式](design/factory.md)
     * [单例模式](design/single.md)
     * [构建模式](design/build.md)
+    * [适配器模式](design/adapter.md)
 	
