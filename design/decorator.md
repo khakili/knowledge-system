@@ -18,7 +18,22 @@
 
 ## 具体如何实现
 
+ -- 主要角色 --
+
+抽象类：定义一个抽象接口，用以规定这个被装饰者都有哪些功能。
+
+被装饰者类：定义一个具体的对象，具体实现功能。
+
+装饰抽象类：实现了抽象接口,并把抽象类对象作为它的实例变量，从外类来扩展抽象类的功能。
+
+装饰者类：负责具体给原型类增加功能。
+
+
 ## 应用场景都有哪些
+
+![](images/pattern/decorator_1.jpg)
+
+如图所示InputStream的类结构图，InputStream类是以抽象组件存在的，而FileInputStream是具体组件，它实现了抽象组件的所有接口.FilterInputStream是装饰角色，它实现了InputStream类的所有接口，并持有InputStream的对象的实例引用；BufferedInputStream是具体的装饰器实现者，它给InputStream附加了功能，这个装饰器类的作用使得InputStream读取的数据保存在内存中，从而提高读取的性能。与这个装饰器类类似的功能还有LineNumberInputStream类，它的作用是提高按行读取数据的功能，它们都让InputStream增强了功能或提升了性能。
 
 
 ## 优点与缺点
