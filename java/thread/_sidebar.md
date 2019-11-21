@@ -1,4 +1,4 @@
-* **理论基础**
+<!--* **理论基础**
 	* [万恶之源：可见性、有序性及原子性问题](java/thread/origin.md)
 	* [互斥锁（上）：解决原子性问题](java/thread/mutex1.md)
 	* [互斥锁（下）：如何用一把锁保护多个资源？](java/thread/mutex2.md)
@@ -14,6 +14,6 @@
     * [Executor与线程池：如何创建正确的线程池？](java/thread/executor.md)
     * [Future：如何用多线程实现最优的“烧水泡茶”程序？](java/thread/future.md)
     * [CompletionService：如何批量执行异步任务？](java/thread/completionService.md)
-* **案例分析**
+* **案例分析**-->
 * **源码分析**
-	* [ReentrantLock中的AQS](java/thread/AQS.md)
+	* [ReentrantLock中的AQS](java/thread/concurrent/AQS.md)
