@@ -56,5 +56,11 @@
 ```
 - 为什么③处的反序列化也是可以成功的呢？
     在使用parseObject(String text)方法时，会使用JSON对象中DEFAULT_PARSER_FEATURE属性，
-    而这个属性在初始化的时候，
+    也就是默认可以反序列化成功的。如果要强校验JSON，请使用以下代码
+```java
+        //只针对这个字符串
+        String str =" {'area':{'area':'1','pagetype':'home'},'pagetype':'home'}";
+        int feature = Feature.config(JSON.DEFAULT_PARSER_FEATURE,Feature.AllowSingleQuotes,false);
+        JSON.parse(str,feature);  
+```
     
