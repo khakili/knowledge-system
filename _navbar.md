@@ -3,6 +3,7 @@
 	* [JAVA集合类](/java/collection/) 
 	* [JAVA多线程](/java/thread/)
 	* [JVM和GC](/java/gc/)
+	* [HikariCP](/java/jdbc/hikari/)
 * [数据库](/database/)
 * 中间件
 	* [消息中间件MQ](/middleware/mq/)

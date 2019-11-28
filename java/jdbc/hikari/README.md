@@ -1,11 +1,1 @@
-FastList与ArrayList的异同
-相同点：
-全部都实现了List<T>, RandomAccess, Serializable接口
-都是非线程安全的类
-不同点：
-FastList不支持Clone
-FastList默认构造函数初始化了一个长度为32的数组，而ArrayList默认创建了一个空数组
-FastList有很多方法都没有实现，如集合的交并补
-FastList存储的Item是泛型实际类型的数组，而ArrayList存储的是Object数组
-FastList扩容2倍，ArrayList扩容1.5倍
-FastList快在哪里
+# HikariCP
