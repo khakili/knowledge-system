@@ -1,4 +1,4 @@
-# 【HikariCP源码分析】FastList介绍
+# 【HikariCP源码阅读】FastList学习
 ###### FastList与ArrayList对比，具体源码分析请看： https://github.com/khakili/HikariCP/blob/dev/src/main/java/com/zaxxer/hikari/util/FastList.java
 ## FastList类图
 ![](./image/FastList类图.png)
